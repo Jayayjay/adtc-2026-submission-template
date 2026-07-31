@@ -1,37 +1,37 @@
 {
-  "team_id": "your-team-id",
-  "domain": "coding_assistants",
+  "team_id": "TODO_team_id",
+  "domain": "healthcare_medical",
   "language_scope": ["en"],
-  "african_alpha_claim": false,
+  "african_alpha_claim": true,
   "budget_laptop_claim": true,
   "submitter": {
-    "name": "your-name",
-    "email": "your-email@domain.com",
-    "github_handle": "your-github"
+    "name": "Nanbol Vongchak",
+    "email": "vongchaknanbol@gmail.com",
+    "github_handle": "Jayayjay"
   },
   "cross_disciplinary_pairing": {
-    "discipline": "education",
+    "discipline": "paediatric primary care (WHO IMCI)",
     "load_bearing": true,
-    "description": "Brief description of how your model serves a real-world domain."
+    "description": "The model applies the WHO Integrated Management of Childhood Illness (IMCI) protocol to classify illness in children 2 months to 5 years old and recommend the correct action. Pairing on-device language understanding with a published clinical standard is what makes it useful: it lets a community health worker in a low-connectivity clinic apply the chart booklet's logic from a free-text description of a child, offline, on a budget laptop."
   },
   "test_prompts": [
     {
       "prompt_id": "tp_001",
-      "prompt": "Write a Python function that reads a CSV file and returns the column with the highest mean value."
+      "prompt": "A 9-month-old boy has had a cough for three days. You count 58 breaths per minute. There is no chest indrawing and no stridor when he is calm. Using the IMCI chart, how should this child be classified, and what should the health worker do?"
     },
     {
       "prompt_id": "tp_002",
-      "prompt": "Explain the difference between a list and a tuple in Python, and give one example where each is the better choice."
+      "prompt": "A 2-year-old is brought to the clinic after having convulsions at home this morning. She is now lethargic and difficult to wake. How should this child be classified under IMCI, and what is the immediate action?"
     }
   ],
   "model": {
-    "name": "SmolLM2-135M-Instruct-Q4_K_M",
+    "name": "Qwen3.5-0.8B-IMCI-Q4_K_M",
     "runtime": "llama.cpp",
     "quantization": "GGUF Q4_K_M",
-    "parameters_estimate": "135M",
+    "parameters_estimate": "0.8B",
     "packaging": "binary_bundle"
   },
   "_runtime": {
-    "model_path": "model/SmolLM2-135M-Instruct-Q4_K_M.gguf"
+    "model_path": "model/Qwen3.5-0.8B-IMCI-Q4_K_M.gguf"
   }
 }

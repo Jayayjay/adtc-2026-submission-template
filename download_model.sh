@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Download your model weight file.
+# Download the model weight file.
 #
 # Rules:
 #   - Must be idempotent (safe to run multiple times).
@@ -10,11 +10,10 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODEL_DIR="$HERE/model"
-MODEL_FILE="$MODEL_DIR/SmolLM2-135M-Instruct-Q4_K_M.gguf"
+MODEL_FILE="$MODEL_DIR/Qwen3.5-0.8B-IMCI-Q4_K_M.gguf"
 
-# ── Replace this URL with your public model weight URL ─────────────────────────
-MODEL_URL="https://huggingface.co/bartowski/SmolLM2-135M-Instruct-GGUF/resolve/main/SmolLM2-135M-Instruct-Q4_K_M.gguf"
-# ───────────────────────────────────────────────────────────────────────────────
+# Public URL of the fine-tuned Q4_K_M gguf (apache-2.0, no login required).
+MODEL_URL="https://huggingface.co/jayayjay/Qwen3.5-0.8B-IMCI-GGUF/resolve/main/Qwen3.5-0.8B-IMCI-Q4_K_M.gguf"
 
 mkdir -p "$MODEL_DIR"
 
@@ -23,7 +22,7 @@ if [[ -f "$MODEL_FILE" ]]; then
   exit 0
 fi
 
-echo "downloading $MODEL_URL → $MODEL_FILE (~80 MB)…"
+echo "downloading $MODEL_URL → $MODEL_FILE (~530 MB)…"
 
 if command -v curl > /dev/null 2>&1; then
   curl -L --fail --progress-bar -o "$MODEL_FILE.partial" "$MODEL_URL"
