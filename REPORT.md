@@ -1,9 +1,11 @@
 # Technical Report — Offline IMCI Triage Assistant
 
-**Team ID:** TODO_team_id  <!-- pending ADTF-portal team registration -->
+**Team ID:** jayayjay-imci
 **Submitter:** Nanbol Vongchak (github: Jayayjay)
 **Domain:** healthcare_medical
 **Model:** Qwen3.5-0.8B-IMCI-Q4_K_M (fine-tuned Qwen3.5-0.8B, GGUF Q4_K_M)
+**Demo video (≤ 2 min):** https://youtu.be/ViKWaAFDPVk
+**Model weights:** https://huggingface.co/jayayjay/Qwen3.5-0.8B-IMCI-GGUF
 
 ---
 
@@ -97,10 +99,12 @@ Two things from that work were not wasted, and both shape the final submission:
 - The deterministic rule engine survived as the **ground-truth labeler and
   offline scorer** for the fine-tuning data — it just moved from runtime to
   build time.
-- The orchestration policy's core skill — *ask the one correct next question when
-  a case is underspecified, instead of inventing the missing sign* — was
-  **distilled into the weights** as a dedicated slice of the training mixture.
-  The capability outlived the architecture.
+- The orchestration policy's core skill — *ask the correct next question when a
+  case is underspecified, instead of inventing the missing sign* — was included as
+  a dedicated slice of the training mixture. This is a **partial** transfer: on a
+  fully specified case the model classifies correctly, but on a bare prompt
+  ("a child has a cough") it still tends to assume the absent signs rather than ask
+  — the weakest of the trained behaviours (see the honest limitation below).
 
 ### Getting IMCI knowledge into the weights
 
@@ -126,10 +130,12 @@ it. The same rule engine scores the fine-tuned model offline.
 
 **Fine-tuning.** LoRA (rank 16) on the attention, SSM, and feed-forward
 projections, completion-only loss, ~2 epochs. The corpus is a deliberate mixture:
-75% triage, plus scope-refusals (the model declines cases the protocol subset does
-not cover, rather than guessing), next-question prompts (it asks for the one
-missing sign instead of inventing it), and a self-distilled general-chat slice to
-prevent catastrophic forgetting of ordinary conversation.
+75% triage, plus scope-refusal examples (declining cases outside the covered
+subset), next-question examples (asking for a missing sign rather than inventing
+it), and a self-distilled general-chat slice to prevent catastrophic forgetting of
+ordinary conversation. The triage behaviour transferred strongly; the
+scope-refusal and next-question behaviours transferred only weakly at 0.8B and are
+documented honestly under *Known limitations*.
 
 **Guarding against under-triage.** Predicting "mild" for a child who is actually
 severe is categorically worse than the reverse. Data generation enforces this: any
@@ -218,6 +224,35 @@ substitute for the chart booklet, and the model says so to the user.
 Both vignette sets are authored by the team, so this measures protocol-application
 accuracy, not clinical validity, and is a weaker proxy than the hidden judge
 prompts.
+
+### Known limitations (stated plainly)
+
+1. **Extended / young-infant severe branches** — ~79% severity accuracy, ~18%
+   under-triage; underfit at 0.8B and not a validated substitute for the chart.
+2. **Scope refusal is weak** — asked an out-of-scope question (e.g. an *adult*
+   dose), the model tends to answer within its IMCI frame rather than decline. Do
+   not rely on it to police its own scope.
+3. **Under-specified prompts** — given too little information it tends to assume
+   the missing signs and classify anyway, rather than ask for them.
+4. **Raw / no-chat-template serving** drops to ~50% — the model must be served
+   through its chat template (as `llama.cpp` and the profiler do).
+
+Items 2–3 are the two behaviours whose transfer was weakest; they are design
+intents in the training mixture that the 0.8B model realises only partially. Core
+triage — the graded task — is unaffected (100/100/0).
+
+### Screenshots — the model running offline
+
+Real, unedited output from the submission `.gguf` (served through its chat
+template, greedy decode, on the dev laptop). Full transcript:
+`report/data/demo_transcript.txt`.
+
+| | Case | Result |
+|---|---|---|
+| ![pneumonia](screenshots/case1.png) | 9-mo, cough, 58/min | Pneumonia → treat + follow-up (🟡) |
+| ![danger sign](screenshots/case2.png) | 2-yr, convulsions, lethargic | Very severe disease → refer urgently (🔴) |
+| ![dehydration](screenshots/case3.png) | 1-yr, diarrhoea, sunken eyes | Some dehydration → Plan B ORS (🟡) |
+| ![cough or cold](screenshots/case4.png) | 18-mo, runny nose, 32/min | Cough or cold → home care (🟢) |
 
 ### Performance / efficiency (measured with the ADTC profiler, participant mode)
 
