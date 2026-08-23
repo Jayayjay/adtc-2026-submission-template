@@ -267,21 +267,26 @@ organizers' standard machine (4 vCPU / 8 GB); these are the dev-machine referenc
 | Dev machine | Intel i5-7300U @ 2.6 GHz (2 cores / 4 threads), 15 GiB RAM, Kali (kernel 7.0.12) |
 | Peak RAM (RSS) | 857 MB → **Seff ≈ 87.8 / 100** at the 7 GB budget |
 | Steady-state RAM | 810 MB |
-| Generation speed | 21.7 tok/s → **Sperf capped at 100** (15 tok/s reference) |
+| Generation speed | ~20–22 tok/s from a cool start → **Sperf capped at 100** (15 tok/s reference); thermally sensitive — see note |
 | Time to first token | 7.8 s (512-token prefill, 2 cores — prefill-bound; a 4-vCPU machine is materially faster) |
 | Params (profiler-verified) | 752 M, arch `qwen35` — matches the 0.8B claim |
-| Thermal | hottest core 93 °C, **throttling flagged** on this laptop (see note) |
+| Thermal | hottest core up to 97 °C, **throttling flagged** on this laptop (see note) |
 
 **Thermal — honest note.** This development machine is a 2017 15 W ultrabook that
-thermally throttles under any sustained all-core load; the profiler flags it even
-from a cool start (a −10 penalty *if the model were graded on this hardware*). An
-internal 300 s sustained-generation bench (`scripts/bench_thermal.py`) read a 79 °C
-package peak with no throughput collapse — the profiler's short-burst prompt
-processing (512-token prefill across all cores) spikes the hottest core higher.
-Throughput still held at ~22 tok/s through the throttle because generation is a
-brief burst, and RAM headroom is large (857 MB of a 7 GB budget → no OOM risk). The
-graded thermal reading is taken on the organizers' standard audit machine, not on
-this laptop.
+thermally throttles under any sustained all-core load; the profiler flags
+`throttled: true` (hottest core ~97 °C) even from a cool ~51 °C start, because the
+512-token all-core prefill drives the package to its limit within seconds. That is
+a property of this specific laptop's cooling, not of the model — the −10 thermal
+penalty would apply *only if the model were graded on this hardware*, and it is not.
+
+**Throughput is therefore thermally sensitive on this machine.** Measured with the
+profiler in participant mode: **~20 tok/s from a cool start** vs. **~11 tok/s when
+the CPU is already heat-soaked** from a prior run. Both are valid participant-laptop
+readings; they differ only in the starting die temperature. A judge who re-runs
+`download_model.sh` + the profiler back-to-back may see the lower figure on the
+second pass — this is expected and is the reason the graded Sperf/thermal are taken
+on the organizers' standard audit machine (4 vCPU / 8 GB), not on this laptop. RAM
+headroom is large regardless (857 MB of a 7 GB budget → no OOM risk).
 
 ---
 
