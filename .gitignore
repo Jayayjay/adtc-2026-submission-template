@@ -1,4 +1,5 @@
 # Model weights — never commit these to git
+*.gguf
 model/*.gguf
 model/*.bin
 model/*.safetensors
