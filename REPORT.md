@@ -1,6 +1,6 @@
 # Technical Report — Offline IMCI Triage Assistant
 
-**Team ID:** jayayjay-imci
+**Team ID:** imci-triage-decision-support
 **Submitter:** Nanbol Vongchak (github: Jayayjay)
 **Domain:** healthcare_medical
 **Model:** Qwen3.5-0.8B-IMCI-Q4_K_M (fine-tuned Qwen3.5-0.8B, GGUF Q4_K_M)
